@@ -21,4 +21,4 @@ pytest tests.py
 
 Use `hash_master_password` to create a hash and store the returned value, not a plaintext password. Argon2 generates a random salt automatically and includes it in the encoded hash.
 
-`login_master_password` returns a boolean to verify whether the password matches the stored password.
+`login_master_password` returns a boolean to verify whether the password matches the stored password, and the rehashed password in the case that Argon2 configuration changes
