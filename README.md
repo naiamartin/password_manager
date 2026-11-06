@@ -1,0 +1,1 @@
+A Python password manager that allows users to add, view, edit and delete saved login details. The application will use a master password to control access and encryption to protect stored account information.
