@@ -1,3 +1,7 @@
 __pycache__
 .pytest_cache
 .venv/
+vault.db
+vault.db-journal
+vault.db-wal
+vault.db-shm

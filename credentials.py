@@ -19,7 +19,7 @@ _KDF_LANES = 4
 # SQLite credential storage with AES-256-GCM for the password manager.
 
 class VaultUnlockError(ValueError):
-    "The master password or vault metadata could not unlock the vault."
+    "The master password or vault metadata could not unlock the vault"
 
 
 def _cipher_for(master_password: str, salt: bytes) -> AESGCM:
@@ -33,16 +33,16 @@ def _encrypt(cipher: AESGCM, plaintext: bytes) -> bytes:
 
 def _decrypt(cipher: AESGCM, encrypted: bytes) -> bytes:
     if len(encrypted) < _NONCE_SIZE + _TAG_SIZE:
-        raise InvalidTag("The encrypted record is truncated.")
+        raise InvalidTag("The encrypted record is truncated")
     nonce = encrypted[:_NONCE_SIZE]
     return cipher.decrypt(nonce, encrypted[_NONCE_SIZE:], None)
 
 class CredentialVault:
-    "An unlocked credential store scoped to one authenticated user."
+    "An unlocked credential store scoped to one authenticated user"
 
     def __init__(self, database_path: str | Path, user_id: str, master_password: str):
         if not user_id:
-            raise ValueError("A stable user ID is required.")
+            raise ValueError("A stable user ID is required")
         self._database_path = database_path
         self._user_id = user_id
 
@@ -84,14 +84,14 @@ class CredentialVault:
         try:
             marker = _decrypt(self._cipher, key_check)
         except InvalidTag as error:
-            raise VaultUnlockError("Could not unlock the credential vault.") from error
+            raise VaultUnlockError("Could not unlock the credential vault") from error
         if marker != _KEY_CHECK:
-            raise VaultUnlockError("Could not unlock the credential vault.")
+            raise VaultUnlockError("Could not unlock the credential vault")
 
     def add_credential(self, service: str, username: str, password: str) -> int:
-        "Encrypt and save an entry, returning its database ID."
+        "Encrypt and save an entry, returning its database ID"
         if not service.strip() or not username.strip() or not password:
-            raise ValueError("Service, username and password are required.")
+            raise ValueError("Service, username and password are required")
         entry = {"service": service, "username": username, "password": password}
         encrypted_entry = _encrypt(self._cipher, json.dumps(entry).encode("utf-8"))
         with closing(sqlite3.connect(self._database_path)) as db, db:
@@ -100,3 +100,16 @@ class CredentialVault:
                 (self._user_id, encrypted_entry),
             )
             return cursor.lastrowid
+        
+    def get_credential(self, credential_id: int) -> dict[str, str]:
+        "Retrieve and decrypt an entry owned by this user"
+        with closing(sqlite3.connect(self._database_path)) as db:
+            row = db.execute(
+                "SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",
+                (self._user_id, credential_id),
+            ).fetchone()
+
+        if row is None:
+            raise KeyError(credential_id)
+
+        return json.loads(_decrypt(self._cipher, row[0]))    
