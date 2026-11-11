@@ -8,37 +8,41 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 
-
+# An ecrypted copy of the marker to check the derived key
 _KEY_CHECK = b"password-manager AES-GCM vault v1"
 _NONCE_SIZE = 12
 _TAG_SIZE = 16
+
+# Keep settings consistent
 _KDF_MEMORY_KIB = 64 * 1024
 _KDF_ITERATIONS = 3
 _KDF_LANES = 4
 
-# SQLite credential storage with AES-256-GCM for the password manager.
+# SQLite credential storage with AES-256-GCM for the password manager
 
 class VaultUnlockError(ValueError):
-    "The master password or vault metadata could not unlock the vault"
+    """The master password or vault metadata could not unlock the vault"""
 
 
 def _cipher_for(master_password: str, salt: bytes) -> AESGCM:
+    """Derive a 32-byte AES key from the master password and vault salt"""
     kdf = Argon2id(salt=salt, length=32, iterations=_KDF_ITERATIONS, lanes=_KDF_LANES, memory_cost=_KDF_MEMORY_KIB)
     key = kdf.derive(master_password.encode("utf-8"))
     return AESGCM(key)
 
 def _encrypt(cipher: AESGCM, plaintext: bytes) -> bytes:
-    nonce = secrets.token_bytes(_NONCE_SIZE)
+    nonce = secrets.token_bytes(_NONCE_SIZE) # Generate a fresh nonce and store it before the ciphertext and tag
     return nonce + cipher.encrypt(nonce, plaintext, None)
 
 def _decrypt(cipher: AESGCM, encrypted: bytes) -> bytes:
-    if len(encrypted) < _NONCE_SIZE + _TAG_SIZE:
+    if len(encrypted) < _NONCE_SIZE + _TAG_SIZE:  # A complete record needs at least a nonce and an authentication tag
         raise InvalidTag("The encrypted record is truncated")
     nonce = encrypted[:_NONCE_SIZE]
+    # AES-GCM verifies the authentication tag before returning the plaintext
     return cipher.decrypt(nonce, encrypted[_NONCE_SIZE:], None)
 
 class CredentialVault:
-    "An unlocked credential store scoped to one authenticated user"
+    """An unlocked credential store scoped to one authenticated user"""
 
     def __init__(self, database_path: str | Path, user_id: str, master_password: str):
         if not user_id:
@@ -46,6 +50,7 @@ class CredentialVault:
         self._database_path = database_path
         self._user_id = user_id
 
+        # SQLite opens the database file or creates it on first use
         with closing(sqlite3.connect(database_path)) as db, db:
             db.execute("""
                 CREATE TABLE IF NOT EXISTS vaults (
@@ -63,6 +68,8 @@ class CredentialVault:
             """)
             select_vault = "SELECT salt, key_check FROM vaults WHERE user_id = ?"
             stored_vault = db.execute(select_vault, (user_id,)).fetchone()
+            
+            # On first use create a salt and save an encrypted key check
             if stored_vault is None:
                 salt = secrets.token_bytes(16)
                 cipher = _cipher_for(master_password, salt)
@@ -78,7 +85,8 @@ class CredentialVault:
                     self._cipher = cipher
                     return
                 stored_vault = db.execute(select_vault, (user_id,)).fetchone()
-
+        
+        # Use the saved salt to derive the key for this vault again
         salt, key_check = stored_vault
         self._cipher = _cipher_for(master_password, salt)
         try:
@@ -89,9 +97,11 @@ class CredentialVault:
             raise VaultUnlockError("Could not unlock the credential vault")
 
     def add_credential(self, service: str, username: str, password: str) -> int:
-        "Encrypt and save an entry, returning its database ID"
+        """Encrypt and save an entry, returning its database ID"""
         if not service.strip() or not username.strip() or not password:
             raise ValueError("Service, username and password are required")
+        
+        # Serialize and encrypt the account details before writing them to SQLite
         entry = {"service": service, "username": username, "password": password}
         encrypted_entry = _encrypt(self._cipher, json.dumps(entry).encode("utf-8"))
         with closing(sqlite3.connect(self._database_path)) as db, db:
@@ -102,8 +112,9 @@ class CredentialVault:
             return cursor.lastrowid
         
     def get_credential(self, credential_id: int) -> dict[str, str]:
-        "Retrieve and decrypt an entry owned by this user"
+        """Retrieve and decrypt an entry owned by this user"""
         with closing(sqlite3.connect(self._database_path)) as db:
+            # Look up the entry by ID and by the user who owns it
             row = db.execute(
                 "SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",
                 (self._user_id, credential_id),
