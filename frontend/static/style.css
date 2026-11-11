@@ -1,0 +1,71 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px;
+    display: grid;
+    place-items: center;
+    background: white;
+    color: #222;
+    font-family: Arial, sans-serif;
+}
+
+.form {
+    width: 100%;
+    max-width: 380px;
+    padding: 32px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.subtitle {
+    margin: 0 0 24px;
+    color: #666;
+}
+
+form,
+.buttons {
+    display: grid;
+    gap: 10px;
+}
+
+label {
+    font-weight: 600;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    font: inherit;
+}
+
+button,
+.button,
+.button-sub {
+    padding: 10px 12px;
+    border: 1px solid #222;
+    border-radius: 4px;
+    background: #222;
+    color: white;
+    font: inherit;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button-sub {
+    background: white;
+    color: #222;
+}
+
+.requirement {
+    margin: -4px 0 4px;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.swipe {
+    margin: 20px 0 0;
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+}

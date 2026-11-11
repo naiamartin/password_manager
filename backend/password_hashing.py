@@ -1,12 +1,10 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
-# TODO when User is created hash their stored password with
-# these functions and store the hash in the database.
-# When they log in, verify their password with the stored hash.
-
-# TODO consider changing method name to apply to all passwords,
-# not just master password
+#Reference:
+#pytest documentation, "Argon2 in Python: Password Hashing Guide"
+#https://mojoauth.com/security-guides/argon2-in-python 
+#Accessed: 6th November 2026
 
 PASSWORD_HASHER = PasswordHasher()
 MIN_PASSWORD_LENGTH = 12
