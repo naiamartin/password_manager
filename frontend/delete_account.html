@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delete Account</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <main class="account_form">
+      <!-- HEADER -->
+      <h1>Delete Account</h1>
+
+      <p class="page_subtitle">
+        Remove a saved account from your password manager.
+      </p>
+
+      <!-- message is displayed when oneis sent from FastAPI -->
+      {% if message %}
+      <p>{{ message }}</p>
+      {% endif %}
+
+      <form action="/delete" method="post">
+        <label for="account_id">Account ID</label>
+        <input
+          type="number"
+          id="account_id"
+          name="account_id"
+          min="1"
+          required
+        />
+
+        <p>Are you sure you want to delete this account?</p>
+
+        <button type="submit">Delete Account</button>
+      </form>
+
+      <p>
+        <a href="/add_account.html">Back to Accounts</a>
+      </p>
+    </main>
+  </body>
+</html>

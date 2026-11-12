@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Account</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <main class="account_form">
+      <!-- HEADER -->
+      <h1>Add Account</h1>
+      <p class="page_subtitle">Save a new account.</p>
+
+      <!-- message is displayed when oneis sent from FastAPI -->
+      {% if message %}
+      <p>{{ message }}</p>
+      {% endif %}
+
+      <!--Sends the details that are entered to FastAPI-->
+      <form action="/add" method="post">
+        <!-- Platform Name textbox-->
+        <label for="platform_name">Platform Name</label>
+        <input type="text" id="platform_name" name="platform_name" required />
+
+        <!-- Username textbox -->
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required />
+        <!-- Password textbox-->
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Save Account</button>
+      </form>
+
+      <!-- Back to Accounts login page -->
+      <p><a href="/login.html">Back to Accounts</a></p>
+    </main>
+  </body>
+</html>

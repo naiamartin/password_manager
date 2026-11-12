@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Accounts</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <main class="account_form">
+      <!--Header-->
+      <h1>Saved Accounts</h1>
+
+      <!--message to check if any accounts -->
+      {% if accounts %}
+
+      <!--wil go through each account one a time-->
+      {% for account in accounts %}
+
+      <!--Displays the platfrom name-->
+      <h3>{{ account.platform_name }}</h3>
+
+      <!--will display the id-->
+      <p>Account ID: {{ account.id }}</p>
+
+      <!--will display the username-->
+      <p>Username: {{ account.username }}</p>
+
+      <hr />
+
+      {% endfor %} {% else %}
+      <!--will display if no accounts were saved-->
+      <p>No accounts were saved</p>
+
+      {% endif %}
+
+      <!-- Back to Accounts login page -->
+      <p><a href="/login.html">Back to Accounts</a></p>
+    </main>
+  </body>
+</html>

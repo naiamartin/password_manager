@@ -8,6 +8,7 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 
+
 # An ecrypted copy of the marker to check the derived key
 _KEY_CHECK = b"password-manager AES-GCM vault v1"
 _NONCE_SIZE = 12
