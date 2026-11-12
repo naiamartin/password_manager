@@ -1,4 +1,4 @@
-from password_hashing import hash_master_password, login_master_password
+from password_manager.backend.password_hashing import hash_master_password, login_master_password
 
 
 def test_master_password_hashing():

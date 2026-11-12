@@ -1,3 +1,7 @@
 argon2-cffi
 pytest
 cryptography>=45
+fastapi
+uvicorn
+python-multipart
+jinja2 #for dynamic html for errors or success messages

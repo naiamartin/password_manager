@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account | Password Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="form"> 
+        <h1>Create account</h1>
+        <p class="subtitle">Get started with Password Manager.</p>
+        {% if message %}<p>{{ message }}</p>{% endif %}
+
+        <form action="/register" method="post">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" required>
+
+            <label for="master-password">Master password</label>
+            <input id="master-password" name="master_password" type="password"
+                   autocomplete="new-password" minlength="12" required>
+            <p class="requirement">Use at least 12 characters.</p>
+
+            <button type="submit">Create account</button>
+        </form>
+
+        <p class="swipe">Already have an account? <a href="/login">Log in</a></p>
+    </main>
+</body>
+</html>

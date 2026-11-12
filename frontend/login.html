@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Password Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="form">
+        <h1>Welcome back</h1>
+        <p class="subtitle">Log in to your Password Manager account.</p>
+        {% if message %}<p>{{ message }}</p>{% endif %}
+
+        <form action="/login" method="post">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" required>
+
+            <label for="master-password">Master password</label>
+            <input id="master-password" name="master_password" type="password"
+                   autocomplete="current-password" required>
+
+            <button type="submit">Log in</button>
+        </form>
+
+        <p class="swipe">Don't have an account? <a href="/register">Create an account</a></p>
+    </main>
+</body>
+</html>
