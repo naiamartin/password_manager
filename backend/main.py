@@ -33,9 +33,15 @@ activeVaults = {}
 # Will get the logged-in user's vault
 def get_vault(request: Request):
 
+     # Will see if user is logged in before give them acess to the page
+    if not sessionId or sessionId not in activeVaults:
+        raise HTTPException(status_code=401, detail="Please log in")
+    
     # Will get the session ID from the browser
     sessionId = request.cookies.get("sessionId")
 
+    # will retuen the logged-in users vault
+    return activeVaults[sessionId]
 
 @app.get("/")
 async def home(request: Request):
