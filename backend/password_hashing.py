@@ -2,7 +2,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 #Reference:
-#pytest documentation, "Argon2 in Python: Password Hashing Guide"
+#MojoAuth, "Argon2 in Python: Password Hashing Guide"
 #https://mojoauth.com/security-guides/argon2-in-python 
 #Accessed: 6th November 2026
 
