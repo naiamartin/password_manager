@@ -31,9 +31,11 @@ def _cipher_for(master_password: str, salt: bytes) -> AESGCM:
     key = kdf.derive(master_password.encode("utf-8"))
     return AESGCM(key)
 
+
 def _encrypt(cipher: AESGCM, plaintext: bytes) -> bytes:
     nonce = secrets.token_bytes(_NONCE_SIZE) # Generate a fresh nonce and store it before the ciphertext and tag
     return nonce + cipher.encrypt(nonce, plaintext, None)
+
 
 def _decrypt(cipher: AESGCM, encrypted: bytes) -> bytes:
     if len(encrypted) < _NONCE_SIZE + _TAG_SIZE:  # A complete record needs at least a nonce and an authentication tag
@@ -41,6 +43,7 @@ def _decrypt(cipher: AESGCM, encrypted: bytes) -> bytes:
     nonce = encrypted[:_NONCE_SIZE]
     # AES-GCM verifies the authentication tag before returning the plaintext
     return cipher.decrypt(nonce, encrypted[_NONCE_SIZE:], None)
+
 
 class CredentialVault:
     """An unlocked credential store scoped to one authenticated user"""
@@ -69,7 +72,7 @@ class CredentialVault:
             """)
             select_vault = "SELECT salt, key_check FROM vaults WHERE user_id = ?"
             stored_vault = db.execute(select_vault, (user_id,)).fetchone()
-            
+           
             # On first use create a salt and save an encrypted key check
             if stored_vault is None:
                 salt = secrets.token_bytes(16)
@@ -86,7 +89,7 @@ class CredentialVault:
                     self._cipher = cipher
                     return
                 stored_vault = db.execute(select_vault, (user_id,)).fetchone()
-        
+       
         # Use the saved salt to derive the key for this vault again
         salt, key_check = stored_vault
         self._cipher = _cipher_for(master_password, salt)
@@ -97,7 +100,8 @@ class CredentialVault:
         if marker != _KEY_CHECK:
             raise VaultUnlockError("Could not unlock the credential vault")
 
-###ADD Credentials
+
+### ADD Credentials
     def add_credential(self, platform_name: str, username: str, password: str) -> int:
         ## Encrypt and save an entry, returning its database ID
         if not platform_name.strip() or not username.strip() or not password:

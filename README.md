@@ -1,5 +1,5 @@
 # Password Manager
-A Python password manager that allows users to add, view, edit and delete saved details. The application will use a master password to control access and encryption to protect stored account information.
+A Python password manager that allows users to create an account, log in, and add, view, edit and delete saved account details. A master password controls access, and encryption protects the saved details.
 
 
 ## Setup
@@ -13,30 +13,50 @@ pip install -r requirements.txt
 Start the demo from the same directory:
 
 ```bash
-uvicorn main:app --reload
+uvicorn backend.main:app --reload
 ```
 
 Then open http://127.0.0.1:8000.
 
-Run the backend tests from the tests directory in backend:
+The app uses `users.db` in the `password_manager` directory for user and vault data.
+
+Run the backend tests from the `password_manager` directory:
 
 ```bash
-pytest test_account_setup.py tests_hashing.py
+python -m pytest backend/tests/test_account_setup.py backend/tests/tests_hashing.py
 ```
+
+## Libraries used
+
+- `argon2-cffi` for hashing the master password.
+- `pytest` runs the tests
+- `cryptography` used to encrypt and decrypt saved account details
+- `fastapi` used to create the app (connects backend with frontend)
+- `uvicorn` runs the app on a local server
+- `python-multipart` used to read data from the forms
+- `jinja2` used to show the HTML pages and messages
+- `flake8` used for python styling
 
 ## Password hashing
 
-Use `hash_master_password` to create a hash and store the returned value, not a plaintext password. Argon2 generates a random salt automatically and includes it in the encoded hash.
+`hash_master_password` creates a hash and stores the returned value, not a plaintext password. Argon2 generates a random salt automatically and includes it in the encoded hash.
 
-`login_master_password` returns a boolean to verify whether the password matches the stored password, and the rehashed password in the case that Argon2 configuration changes.
+`login_master_password` returns whether the password matches and a new hash if the Argon2 settings have changed.
+
+The master password must be at least 12 characters long.
 
 ## Credential vault
 
-After a successful login, create a `CredentialVault` with the path to
-`vault.db`, the authenticated user's ID, and their master password.
-Keep the vault instance for the session and discard it on logout.
+After a successful login a `CredentialVault` is created using `users.db`,
+the authenticated user's ID, and their master password. The vault uses Argon2id
+to provide a key and AES-GCM to encrypt account details.
 
-- `add_credential(service, username, password)` encrypts and saves an
-  entry, then returns its ID.
+- `add_credential(platform_name, username, password)` encrypts and saves an
+  entry then returns its ID.
 - `get_credential(credential_id)` retrieves and decrypts an entry
   owned by the authenticated user.
+- `show_credentials()` shows the saved account names and usernames.
+- `edit_credential(credential_id, platform_name, username, password)` updates an entry.
+- `delete_credential(credential_id)` deletes an entry.
+
+The app keeps the vault for the logged-in session.

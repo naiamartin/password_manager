@@ -20,7 +20,7 @@ FRONTEND = Path("frontend")
 STATIC_FILES = FRONTEND / "static"
 DATABASE_PATH = Path("users.db")
 
-initialise_database(DATABASE_PATH)  #ensure the database is initialized at startup
+initialise_database(DATABASE_PATH)  # ensure the database is initialized at startup
 
 app = FastAPI(title="Password Manager")
 app.mount("/static", StaticFiles(directory=STATIC_FILES), name="static")
@@ -33,7 +33,7 @@ activeVaults = {}
 # Will get the logged-in user's vault
 def get_vault(request: Request):
 
-     # Will get the session ID from the browser
+    # Will get the session ID from the browser
     sessionId = request.cookies.get("sessionId")
 
      # Will see if user is logged in before give them acess to the page
@@ -43,6 +43,7 @@ def get_vault(request: Request):
     # will retuen the logged-in users vault
     return activeVaults[sessionId]
 
+
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse(
@@ -51,7 +52,6 @@ async def home(request: Request):
         name="index.html",
         context={"username": None},
     )
-
 
 @app.get("/register")
 async def register_page(request: Request):
@@ -64,9 +64,9 @@ async def register_page(request: Request):
 
 @app.post("/register")
 async def register(
-    #handle the registration form submission
+    # handle the registration form submission
     request: Request,
-    username: str = Form(...), #ensure str type for username and master_password
+    username: str = Form(...),  # ensure str type for username and master_password
     master_password: str = Form(...),
 ):
     success, message = register_user(DATABASE_PATH, username, master_password)
@@ -75,7 +75,7 @@ async def register(
         return RedirectResponse("/login?registered=1", status_code=303)
 
     return templates.TemplateResponse(
-        #render the register.html template with an error message if registration fails
+        # render the register.html template with an error message if registration fails
         request=request,
         name="register.html",
         context={"message": message},
@@ -86,13 +86,13 @@ async def register(
 @app.get("/login")
 async def login_page(request: Request):
     message = (
-        #display a success message if the user has just registered
+        # display a success message if the user has just registered
         "Account created. You can now log in."
         if request.query_params.get("registered") == "1"
         else None
     )
     return templates.TemplateResponse(
-        #render the login.html template with a message
+        # render the login.html template with a message
         request=request,
         name="login.html",
         context={"message": message},
@@ -101,14 +101,14 @@ async def login_page(request: Request):
 
 @app.post("/login")
 async def login(
-    #handle the login form submission
+    # handle the login form submission
     request: Request,
     username: str = Form(...),
     master_password: str = Form(...),
 ):
     success, message = login_user(DATABASE_PATH, username, master_password)
     if not success:
-        #render the login.html template with an error message if login fails
+        # render the login.html template with an error message if login fails
         return templates.TemplateResponse(
             request=request,
             name="login.html",
@@ -116,8 +116,8 @@ async def login(
             status_code=400,
         )
 
-     # Will open the user's password vault
-    vault = CredentialVault( DATABASE_PATH, message, master_password)
+    # Will open the user's password vault
+    vault = CredentialVault(DATABASE_PATH, message, master_password)
 
     # Will create a session ID for the logged-in user
     sessionId = secrets.token_urlsafe(32)
@@ -129,22 +129,22 @@ async def login(
     response = RedirectResponse("/view", status_code=303)
 
     # Will remember the logged-in user by setting a cookie in the browser
-    response.set_cookie( "sessionId", sessionId, httponly=True, samesite="lax")
+    response.set_cookie("sessionId", sessionId, httponly=True, samesite="lax")
 
     return response
 
-    #ADD ACCOUNT
+
+# ADD ACCOUNT
 @app.get("/add")
 async def add_page(request: Request):
     # will display the add_account.html webpage in the browser.
     return templates.TemplateResponse(request=request, name="add_account.html")
 
 
-###ADD
-
+# ADD
 # Will save a new account
 @app.post("/add")
-async def add_account(request: Request, platform_name: str = Form(...),username: str = Form(...), password: str = Form(...)):
+async def add_account(request: Request, platform_name: str = Form(...), username: str = Form(...), password: str = Form(...)):
 
     # Will logged-in user's password vault
     vault = get_vault(request)
@@ -156,9 +156,7 @@ async def add_account(request: Request, platform_name: str = Form(...),username:
     return RedirectResponse("/view", status_code=303)
 
 
-
-###VIEW ACCOUNT
-
+# VIEW ACCOUNT
 # Will show all thesaved accounts
 @app.get("/view")
 async def view_accounts(request: Request):
@@ -170,11 +168,10 @@ async def view_accounts(request: Request):
     accounts = vault.show_credentials()
 
     # Shows all accounts on the View Accounts page
-    return templates.TemplateResponse(request=request, name="view_account.html", context={"accounts": accounts}
-    )
+    return templates.TemplateResponse(request=request, name="view_account.html", context={"accounts": accounts})
 
 
-###EDIT ACCOUNT
+# EDIT ACCOUNT
 @app.get("/edit")
 async def edit_page(request: Request):
     # Will see if the user is logged in
@@ -186,7 +183,7 @@ async def edit_page(request: Request):
 
 @app.post("/edit")
 # This will handle the edit account page form submission
-async def edit_account( request: Request, account_id: int = Form(...), platform_name: str = Form(...), username: str = Form(...), password: str = Form(...),
+async def edit_account(request: Request, account_id: int = Form(...), platform_name: str = Form(...), username: str = Form(...), password: str = Form(...),
 ):
     # Will get the logged-in user's vault
     vault = get_vault(request)
@@ -198,10 +195,10 @@ async def edit_account( request: Request, account_id: int = Form(...), platform_
     return RedirectResponse("/view", status_code=303)
 
 
-###DELETE ACCOUNT
+# DELETE ACCOUNT
 # Want to delete a saved account
 @app.post("/delete")
-async def delete_account( request: Request, account_id: int = Form(...)):
+async def delete_account(request: Request, account_id: int = Form(...)):
 
     # Will the logged-in user's password vault
     vault = get_vault(request)
@@ -220,4 +217,4 @@ async def delete_page(request: Request):
     get_vault(request)
 
     # show the delete dccount webpage
-    return templates.TemplateResponse(request=request,name="delete_account.html")
+    return templates.TemplateResponse(request=request, name="delete_account.html")

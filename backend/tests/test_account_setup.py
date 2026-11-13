@@ -1,22 +1,23 @@
-#imports
+# imports
 import pytest
-import account_setup #what i need for the tests
+from backend import account_setup  # what I need for the tests
 
-#Reference:
-#pytest documentation, "How to use fixtures"
-#https://docs.pytest.org/en/stable/how-to/fixtures.html
-#Accessed: 10th November 2026
+# Reference:
+# pytest documentation, "How to use fixtures"
+# https://docs.pytest.org/en/stable/how-to/fixtures.html
+# Accessed: 10th November 2026
 
 @pytest.fixture
-#something my tests can use
-def database_path(tmp_path): #provided by pytest
+# something my tests can use
+def database_path(tmp_path):  # provided by pytest
     """Create a separate test database for each test to provent issues."""
     path = tmp_path / "test_accounts.db"
     account_setup.initialise_database(path)
     account_setup.current_user_id = None
     return str(path)
 
-#Create new user
+
+# Create new user
 def test_register_new_user(database_path):
     success, message = account_setup.register_user(
         database_path, "john", "SecurePassword123!"
@@ -24,7 +25,8 @@ def test_register_new_user(database_path):
 
     assert success is True
 
-#Test a user that already exists
+
+# Test a user that already exists
 def test_register_duplicate_user(database_path):
     account_setup.register_user(
         database_path, "john", "SecurePassword123!"
@@ -36,7 +38,8 @@ def test_register_duplicate_user(database_path):
 
     assert success is False
 
-#A unknown username
+
+# A unknown username
 def test_login_unknown_username(database_path):
     success, message = account_setup.login_user(
         database_path, "unknown_user", "SecurePassword123!"
@@ -45,7 +48,8 @@ def test_login_unknown_username(database_path):
     assert success is False
     assert message == "Invalid username or password."
 
-#A blank username
+
+# A blank username
 def test_register_empty_username(database_path):
     success, message = account_setup.register_user(
         database_path, "   ", "SecurePassword123!"
@@ -54,7 +58,8 @@ def test_register_empty_username(database_path):
     assert success is False
     assert message == "Please enter a username."
 
-#Password too short
+
+# Password too short
 def test_register_short_password(database_path):
     success, message = account_setup.register_user(
         database_path, "john", "short"
@@ -62,7 +67,8 @@ def test_register_short_password(database_path):
 
     assert success is False
 
-#Correct password
+
+# Correct password
 def test_login_correct_password(database_path):
     account_setup.register_user(
         database_path, "john", "SecurePassword123!"
@@ -75,7 +81,8 @@ def test_login_correct_password(database_path):
     assert success is True
     assert account_setup.current_user_id == user_id
 
-#Incorrect password
+
+# Incorrect password
 def test_login_incorrect_password(database_path):
     account_setup.register_user(
         database_path, "john", "SecurePassword123!"
@@ -87,7 +94,8 @@ def test_login_incorrect_password(database_path):
 
     assert success is False
 
-#Log out functionality
+
+# Log out functionality
 def test_logout(database_path):
     account_setup.register_user(
         database_path, "john", "SecurePassword123!"
