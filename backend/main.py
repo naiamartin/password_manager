@@ -135,61 +135,50 @@ async def add_page(request: Request):
 
 
 ###ADD
-@app.post("/add")
-# Save a new account
-@app.post("/add")
-async def add_account(
-    request: Request,
-    platform_name: str = Form(...),
-    username: str = Form(...),
-    password: str = Form(...)
-):
 
-    # Get the logged-in user's password vault
+# Will save a new account
+@app.post("/add")
+async def add_account(request: Request, platform_name: str = Form(...),username: str = Form(...), password: str = Form(...)):
+
+    # Will logged-in user's password vault
     vault = get_vault(request)
 
-    # Save the account details
+    # Save the users account details
     vault.add_credential(platform_name, username, password)
 
-    # Open the View Accounts page
+    # Will go to the View Accounts page
     return RedirectResponse("/view", status_code=303)
 
 
 
 ###VIEW ACCOUNT
 
-# Display all saved accounts
+# Will show all thesaved accounts
 @app.get("/view")
 async def view_accounts(request: Request):
 
-    # Get the logged-in user's password vault
+    # Will get the logged-in user's password vault
     vault = get_vault(request)
 
     # Get all saved accounts from the vault
     accounts = vault.show_credentials()
 
-    # Display the accounts on the View Accounts page
-    return templates.TemplateResponse(
-        request=request,
-        name="view.html",
-        context={"accounts": accounts}
+    # Shows all accounts on the View Accounts page
+    return templates.TemplateResponse(request=request, name="view.html", context={"accounts": accounts}
     )
 
 
-###VIEW ACCOUNT
-@app.get("/edit/{account_id}")
-async def edit_page(request: Request, account_id: int):
-    # Will get the logged-in user's vault
-    vault = get_vault(request)
-
-    # Will get the users account details
-    account_cred = vault.get_credential(account_id)
+###EDIT ACCOUNT
+@app.get("/edit")
+async def edit_page(request: Request):
+    # Will see if the user is logged in
+    get_vault(request)
 
     # will display the edit_account.html webpage in the browser.
-    return templates.TemplateResponse(request=request, name="edit_account.html", context={ "account": account_cred,"account_id": account_id})
+    return templates.TemplateResponse(request=request, name="edit_account.html")
 
 
-@app.post("/edit/{account_id}")
+@app.post("/edit")
 # This will handle the edit account page form submission
 async def edit_account( request: Request, account_id: int, platform_name: str = Form(...), username: str = Form(...), password: str = Form(...),
 ):
@@ -204,14 +193,11 @@ async def edit_account( request: Request, account_id: int, platform_name: str = 
 
 
 ###DELETE ACCOUNT
-# Delete a saved account
+# Want to delete a saved account
 @app.post("/delete")
-async def delete_account(
-    request: Request,
-    account_id: int = Form(...)
-):
+async def delete_account( request: Request, account_id: int = Form(...)):
 
-    # Get the logged-in user's password vault
+    # Will the logged-in user's password vault
     vault = get_vault(request)
 
     # Delete the account using its ID
@@ -219,3 +205,13 @@ async def delete_account(
 
     # Go back to the View Accounts page
     return RedirectResponse("/view", status_code=303)
+
+
+@app.get("/delete")
+async def delete_page(request: Request):
+
+    # Sees of user is logged in
+    get_vault(request)
+
+    # show the delete dccount webpage
+    return templates.TemplateResponse(request=request,name="delete_account.html")

@@ -1,23 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Password Manager</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
     <main class="form">
-        <h1>Password Manager</h1>
-        <p class="subtitle">Keep your accounts secure in one place.</p>
-        {% if username %}
-        <p>You are logged in as {{ username }}.</p>
-        {% else %}
-        <nav class="buttons">
-            <a class="button" href="/login">Log in</a>
-            <a class="button-sub" href="/register">Create account</a>
-        </nav>
-        {% endif %}
+      <h1>Password Manager</h1>
+      <p class="subtitle">Keep your accounts secure in one place.</p>
+      {% if username %}
+      <p>You are logged in as {{ username }}.</p>
+      {% else %}
+      <nav class="buttons">
+        <a class="button" href="/login">Log in</a>
+        <a class="button-sub" href="/register">Create account</a>
+      </nav>
+      {% endif %}
     </main>
-</body>
+  </body>
 </html>

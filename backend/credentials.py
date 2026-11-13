@@ -97,31 +97,67 @@ class CredentialVault:
         if marker != _KEY_CHECK:
             raise VaultUnlockError("Could not unlock the credential vault")
 
-    def add_credential(self, service: str, username: str, password: str) -> int:
-        """Encrypt and save an entry, returning its database ID"""
-        if not service.strip() or not username.strip() or not password:
-            raise ValueError("Service, username and password are required")
+###ADD Credentials
+    def add_credential(self, platform_name: str, username: str, password: str) -> int:
+        ## Encrypt and save an entry, returning its database ID
+        if not platform_name.strip() or not username.strip() or not password:
+            raise ValueError("Platform name, username and password are required")
         
         # Serialize and encrypt the account details before writing them to SQLite
-        entry = {"service": service, "username": username, "password": password}
+        entry = {"platform": platform_name, "username": username, "password": password}
         encrypted_entry = _encrypt(self._cipher, json.dumps(entry).encode("utf-8"))
         with closing(sqlite3.connect(self._database_path)) as db, db:
-            cursor = db.execute(
-                "INSERT INTO credentials (user_id, encrypted_entry) VALUES (?, ?)",
+            cursor = db.execute("INSERT INTO credentials (user_id, encrypted_entry) VALUES (?, ?)",
                 (self._user_id, encrypted_entry),
             )
             return cursor.lastrowid
-        
+### GET Credentials
     def get_credential(self, credential_id: int) -> dict[str, str]:
-        """Retrieve and decrypt an entry owned by this user"""
+        ##Retrieve and decrypt an entry owned by this user
         with closing(sqlite3.connect(self._database_path)) as db:
             # Look up the entry by ID and by the user who owns it
-            row = db.execute(
-                "SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",
-                (self._user_id, credential_id),
+            row = db.execute("SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",(self._user_id, credential_id),
             ).fetchone()
 
         if row is None:
             raise KeyError(credential_id)
 
-        return json.loads(_decrypt(self._cipher, row[0]))    
+        return json.loads(_decrypt(self._cipher, row[0]))
+
+    
+    ### SHOW Credentials
+    def show_credentials(self):
+
+        # Will connect to the database
+        with closing(sqlite3.connect(self._database_path)) as db:
+
+            # WIll get all thesaved accounts that belongs to the user logged inuser
+            rows = db.execute("SELECT id, encrypted_entry FROM credentials WHERE user_id = ?",(self._user_id,)
+            ).fetchall()
+
+        # Will create an empty list so that all the saved accounts can be added to it
+        accounts = []
+
+        # Will go through all the saved account
+        for row in rows:
+
+            # Will get the account ID
+            credentialId = row[0]
+
+            # Will the encrypted account details
+            encryptedEntry = row[1]
+
+            # Will decrypt the account details
+            decryptedText = _decrypt(self._cipher, encryptedEntry)
+
+            # Will convert the decrypted text into account details
+            entryDetails = json.loads(decryptedText)
+
+            # Shows the details
+            accountSummary = {"id": credentialId,"platform_name": entryDetails["platform"],"username": entryDetails["username"]}
+
+            # Account will be added to the list of saved accounts
+            accounts.append(accountSummary)
+
+        # Will return saved accounts
+        return accounts
