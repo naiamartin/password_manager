@@ -33,12 +33,12 @@ activeVaults = {}
 # Will get the logged-in user's vault
 def get_vault(request: Request):
 
+     # Will get the session ID from the browser
+    sessionId = request.cookies.get("sessionId")
+
      # Will see if user is logged in before give them acess to the page
     if not sessionId or sessionId not in activeVaults:
         raise HTTPException(status_code=401, detail="Please log in")
-    
-    # Will get the session ID from the browser
-    sessionId = request.cookies.get("sessionId")
 
     # will retuen the logged-in users vault
     return activeVaults[sessionId]
@@ -126,7 +126,7 @@ async def login(
     activeVaults[sessionId] = vault
 
     # Will go to the accounts page
-    response = RedirectResponse("/accounts", status_code=303)
+    response = RedirectResponse("/view", status_code=303)
 
     # Will remember the logged-in user by setting a cookie in the browser
     response.set_cookie( "sessionId", sessionId, httponly=True, samesite="lax")
@@ -170,7 +170,7 @@ async def view_accounts(request: Request):
     accounts = vault.show_credentials()
 
     # Shows all accounts on the View Accounts page
-    return templates.TemplateResponse(request=request, name="view.html", context={"accounts": accounts}
+    return templates.TemplateResponse(request=request, name="view_account.html", context={"accounts": accounts}
     )
 
 
@@ -186,7 +186,7 @@ async def edit_page(request: Request):
 
 @app.post("/edit")
 # This will handle the edit account page form submission
-async def edit_account( request: Request, account_id: int, platform_name: str = Form(...), username: str = Form(...), password: str = Form(...),
+async def edit_account( request: Request, account_id: int = Form(...), platform_name: str = Form(...), username: str = Form(...), password: str = Form(...),
 ):
     # Will get the logged-in user's vault
     vault = get_vault(request)

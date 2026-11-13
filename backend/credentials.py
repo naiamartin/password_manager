@@ -113,12 +113,15 @@ class CredentialVault:
             return cursor.lastrowid
 ### GET Credentials
     def get_credential(self, credential_id: int) -> dict[str, str]:
-        ##Retrieve and decrypt an entry owned by this user
+        ##Will get and decrypt an entry belonging to the user
         with closing(sqlite3.connect(self._database_path)) as db:
-            # Look up the entry by ID and by the user who owns it
-            row = db.execute("SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",(self._user_id, credential_id),
+            # Will Find the account by ID and by the user ID to make sure the user owns it
+            row = db.execute(
+                "SELECT encrypted_entry FROM credentials WHERE user_id = ? AND id = ?",
+                (self._user_id, credential_id)
             ).fetchone()
 
+        #Will see if the account exists
         if row is None:
             raise KeyError(credential_id)
 
@@ -142,7 +145,7 @@ class CredentialVault:
         for row in rows:
 
             # Will get the account ID
-            credentialId = row[0]
+            credential_id = row[0]
 
             # Will the encrypted account details
             encryptedEntry = row[1]
@@ -154,10 +157,60 @@ class CredentialVault:
             entryDetails = json.loads(decryptedText)
 
             # Shows the details
-            accountSummary = {"id": credentialId,"platform_name": entryDetails["platform"],"username": entryDetails["username"]}
+            accountSummary = {"id": credential_id,"platform_name": entryDetails["platform"],"username": entryDetails["username"]}
 
             # Account will be added to the list of saved accounts
             accounts.append(accountSummary)
 
         # Will return saved accounts
         return accounts
+
+
+    ### EDIT Credentials
+    def edit_credential(
+        self,
+        credential_id: int,
+        platform_name: str,
+        username: str,
+        password: str
+        ):
+
+        # Make sure that all fields have been entered and not left empty
+        if not platform_name.strip() or not username.strip() or not password:
+            raise ValueError("All fields are required")
+
+        # Will get the account and make sure it belongs to user
+        self.get_credential(credential_id)
+
+        # Will store the updated account details
+        updatedEntry = {"platform": platform_name,"username": username,"password": password
+        }
+
+        # Will encrypt the updated useraccount detail
+        encrypted_entry = _encrypt(self._cipher,json.dumps(updatedEntry).encode("utf-8")
+        )
+
+        # Connects to the db
+        with closing(sqlite3.connect(self._database_path)) as db, db:
+
+            # Will update the selected account that belongs to user
+            db.execute(
+                "UPDATE credentials SET encrypted_entry = ? WHERE id = ? AND user_id = ?",
+                (encrypted_entry, credential_id, self._user_id)   
+            )
+
+
+    ### DELETE Credentials
+    def delete_credential(self, credential_id: int):
+
+        # Makes sure that the account exists and belongs to the user that logged in
+        self.get_credential(credential_id)
+
+        # Connects to db
+        with closing(sqlite3.connect(self._database_path)) as db, db:
+
+            # Uses the accounts ID to deltete the account
+            db.execute(
+                "DELETE FROM credentials WHERE id = ? AND user_id = ?",
+                (credential_id, self._user_id)
+            )
