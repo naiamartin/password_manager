@@ -24,6 +24,10 @@ _KDF_LANES = 4
 class VaultUnlockError(ValueError):
     """The master password or vault metadata could not unlock the vault"""
 
+# Reference:
+# Cryptography documentation, "Argon2id"
+# https://cryptography.io/en/latest/hazmat/primitives/key-derivation-functions/#cryptography.hazmat.primitives.kdf.argon2.Argon2id
+# Accessed: 9th November 2026
 
 def _cipher_for(master_password: str, salt: bytes) -> AESGCM:
     """Derive a 32-byte AES key from the master password and vault salt"""
@@ -31,6 +35,10 @@ def _cipher_for(master_password: str, salt: bytes) -> AESGCM:
     key = kdf.derive(master_password.encode("utf-8"))
     return AESGCM(key)
 
+# Reference:
+# Cryptography documentation, "AESGCM"
+# https://cryptography.io/en/latest/hazmat/primitives/aead/#cryptography.hazmat.primitives.ciphers.aead.AESGCM
+# Accessed: 9th November 2026
 
 def _encrypt(cipher: AESGCM, plaintext: bytes) -> bytes:
     nonce = secrets.token_bytes(_NONCE_SIZE) # Generate a fresh nonce and store it before the ciphertext and tag
