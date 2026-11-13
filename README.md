@@ -15,6 +15,9 @@ Start the demo from the same directory:
 ```bash
 uvicorn backend.main:app --reload
 ```
+Start the FastAPI server:
+python -m uvicorn backend.main:app --reload
+
 
 Then open http://127.0.0.1:8000.
 
@@ -36,6 +39,7 @@ python -m pytest backend/tests/test_account_setup.py backend/tests/tests_hashing
 - `python-multipart` used to read data from the forms
 - `jinja2` used to show the HTML pages and messages
 - `flake8` used for python styling
+- `UUID` used for providing unique username identifiers
 
 ## Password hashing
 
