@@ -36,6 +36,7 @@ python -m pytest backend/tests/test_account_setup.py backend/tests/tests_hashing
 - `python-multipart` used to read data from the forms
 - `jinja2` used to show the HTML pages and messages
 - `flake8` used for python styling
+- `UUID` used for providing unique username identifiers
 
 ## Password hashing
 
