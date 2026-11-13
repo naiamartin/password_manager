@@ -15,6 +15,9 @@ Start the demo from the same directory:
 ```bash
 uvicorn main:app --reload
 ```
+Start the FastAPI server:
+python -m uvicorn backend.main:app --reload
+
 
 Then open http://127.0.0.1:8000.
 
